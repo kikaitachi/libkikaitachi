@@ -105,3 +105,7 @@ int kt_connect(char *address, char *port) {
 	return fd;
 }
 
+int kt_send(int fd, const void *buf, size_t len) {
+	return write(fd, buf, len);
+}
+
