@@ -6,7 +6,7 @@ libkikaitachi = shared_library('kikaitachi',
   include_directories : inc,
   install : true)
 
-libsimple_dep = declare_dependency(
+libkikaitachi_dep = declare_dependency(
   include_directories : inc,
   link_with : libkikaitachi)
 
