@@ -38,7 +38,9 @@ int kt_telemetry_send(int fd, kt_telemetry_item *item);
 
 // Network *********************************************************************
 
-void kt_listen(int port,
+int kt_connect(char *address, char *port);
+
+/*void kt_(int port,
 	void(*on_connected)(int fd),
 	void(*on_disconnected)());
 
@@ -48,7 +50,7 @@ void kt_connect(char *address, int port,
 	void(*on_telemetry_item_added)(),
 	void(*on_telemetry_value_updated)(int id, int len, void *value));
 
-void kt_send(int fd, ssize_t len, void *buffer);
+void kt_send(int fd, ssize_t len, void *buffer);*/
 
 #endif
 

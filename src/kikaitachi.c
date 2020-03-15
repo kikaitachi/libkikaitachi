@@ -1,3 +1,4 @@
+#include <arpa/inet.h>
 #include <netinet/in.h>
 #include <stdlib.h>
 #include <string.h>
@@ -80,5 +81,27 @@ int kt_telemetry_send_item(int fd, int parent_id, kt_telemetry_item *item) {
 
 int kt_telemetry_send(int fd, kt_telemetry_item *item) {
 	return kt_telemetry_send_item(fd, 0, item);
+}
+
+// Network *********************************************************************
+
+int kt_connect(char *address, char *port) {
+	int fd = socket(AF_INET, SOCK_DGRAM, 0);
+	if (fd < 0) {
+		return -1;
+	}
+	struct sockaddr_in addr;
+	memset(&addr, 0, sizeof(addr));
+	addr.sin_family = AF_INET;
+	addr.sin_addr.s_addr = INADDR_ANY;
+	addr.sin_port = htons(atoi(port));
+	if (bind(fd, (const struct sockaddr *)&addr, sizeof(addr)) < 0) {
+		return -1;
+	}
+	inet_pton(AF_INET, address, &addr.sin_addr);
+	if (connect(fd, (const struct sockaddr *)&addr, sizeof(addr)) < 0) {
+		return -1;
+	}
+	return fd;
 }
 
