@@ -1,9 +1,25 @@
+#include <netinet/in.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include "kikaitachi.h"
 
 #define MAX_MSG_SIZE 1500
+
+// Messages ********************************************************************
+
+void kt_msg_set_uint32(void *buffer, uint32_t host_int) {
+	uint32_t network_int = htonl(host_int);
+	memcpy(buffer, &network_int, 4);
+}
+
+uint32_t kt_msg_get_uint32(void *buffer) {
+	uint32_t host_int;
+	memcpy(&host_int, buffer, 4);
+	return ntohl(host_int);
+}
+
+// Telemetry *******************************************************************
 
 kt_telemetry_item *kt_telemetry_create_item(int id, int name_len, char* name, enum KT_TELEMETRY_TYPE type, int value_len, char* value) {
 	kt_telemetry_item *item = malloc(sizeof(kt_telemetry_item));
