@@ -148,10 +148,10 @@ int kt_connect(char *address, char *port) {
 	if (bind(fd, (const struct sockaddr *)&addr, sizeof(addr)) < 0) {
 		return -1;
 	}
-	inet_pton(AF_INET, address, &addr.sin_addr);
+	/*inet_pton(AF_INET, address, &addr.sin_addr);
 	if (connect(fd, (const struct sockaddr *)&addr, sizeof(addr)) < 0) {
 		return -1;
-	}
+	}*/
 	return fd;
 }
 
