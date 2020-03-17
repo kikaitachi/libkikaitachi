@@ -85,6 +85,9 @@ enum KT_MESSAGE {
 	KT_MSG_UPDATE_SOFTWARE = 4
 };
 
+int kt_msg_write(void **buf, int *buf_len, void *data, size_t len);
+int kt_msg_read(void **buf, int *buf_len, void *data, size_t len);
+
 int kt_msg_write_int(void **buf, int *buf_len, int value);
 int kt_msg_read_int(void **buf, int *buf_len, int *value);
 
