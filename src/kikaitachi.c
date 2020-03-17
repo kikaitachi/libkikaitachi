@@ -166,9 +166,13 @@ int kt_msg_write_int(void **buf, int *buf_len, int value) {
 			return -1;
 		}
 		((char *)*buf)[0] = ((value > 127 ? 1 : 0) << 1) | (value & 127);
+		kt_log_debug ("Updated buffer to: %d", ((value > 127 ? 1 : 0) << 1) | (value & 127));
 		*buf = *buf + 1;
+		kt_log_debug ("Updated buffer");
 		*buf_len = *buf_len - 1;
+		kt_log_debug ("Updated len");
 		value >>= 7;
+		kt_log_debug ("Updated value");
 	} while (value > 0);
 	return 0;
 }
