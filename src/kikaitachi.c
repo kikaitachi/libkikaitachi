@@ -176,9 +176,9 @@ int kt_msg_write_int(void **buf, int *buf_len, int value) {
 
 int kt_msg_read_int(void **buf, int *buf_len, int *value) {
 	*value = 0;
-	while (*buf_len > 0) {
-		int8_t byte = ((int8_t *)*buf)[0];
-		*value = (*value << 7) | (byte & 127);
+	for (int i = 0; *buf_len > 0; i += 7) {
+		int byte = ((int8_t *)*buf)[0];
+		*value = *value | ((byte & 127) << i);
 		*buf = (int8_t *)*buf + 1;
 		*buf_len = *buf_len - 1;
 		if (byte >= 0) {
