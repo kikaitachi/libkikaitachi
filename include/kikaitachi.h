@@ -38,6 +38,8 @@ int kt_telemetry_send(int fd, kt_telemetry_item *item);
 
 // Network *********************************************************************
 
+#define KT_MAX_MSG_SIZE 65507
+
 int kt_connect(char *address, char *port);
 
 int kt_send(int fd, const void *buf, size_t len);
