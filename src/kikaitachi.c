@@ -160,24 +160,24 @@ int kt_udp_send(int fd, const void *buf, size_t len) {
 
 // Messages ********************************************************************
 
-int kt_msg_write_int(char **buf, int *buf_len, int value) {
+int kt_msg_write_int(void **buf, int *buf_len, int value) {
 	do {
 		if (*buf_len < 1) {
 			return -1;
 		}
-		*buf[0] = ((value > 127 ? 1 : 0) << 1) | (value & 127);
+		((char *)*buf)[0] = ((value > 127 ? 1 : 0) << 1) | (value & 127);
 		*buf = *buf + 1;
-		(*buf_len)--;
+		*buf_len = *buf_len - 1;
 		value >>= 7;
 	} while (value > 0);
 	return 0;
 }
 
-int kt_msg_read_int(char **buf, int *buf_len, int *value) {
+int kt_msg_read_int(void **buf, int *buf_len, int *value) {
 	return 0;
 }
 
-int kt_msg_write_telemetry(char **buf, int *buf_len, int id, enum KT_TELEMETRY_TYPE type, int value_len, void *value) {
+int kt_msg_write_telemetry(void **buf, int *buf_len, int id, enum KT_TELEMETRY_TYPE type, int value_len, void *value) {
 	return 0;
 }
 

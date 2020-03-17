@@ -85,7 +85,7 @@ enum KT_MESSAGE {
 	KT_MSG_UPDATE_SOFTWARE = 4
 };
 
-int kt_msg_write_int(char **buf, int *buf_len, int value);
-int kt_msg_read_int(char **buf, int *buf_len, int *value);
-int kt_msg_write_telemetry(char **buf, int *buf_len, int id, enum KT_TELEMETRY_TYPE type, int value_len, void *value);
+int kt_msg_write_int(void **buf, int *buf_len, int value);
+int kt_msg_read_int(void **buf, int *buf_len, int *value);
+int kt_msg_write_telemetry(void **buf, int *buf_len, int id, enum KT_TELEMETRY_TYPE type, int value_len, void *value);
 
