@@ -62,9 +62,11 @@ int kt_telemetry_send(int fd, kt_telemetry_item *item);
 
 #define KT_MAX_MSG_SIZE 65507
 
-int kt_connect(char *address, char *port);
+int kt_udp_bind(char *port);
 
-int kt_send(int fd, const void *buf, size_t len);
+int kt_udp_connect(char *address, char *port);
+
+//int kt_udp_send(int fd, const void *buf, size_t len);
 
 /*void kt_(int port,
 	void(*on_connected)(int fd),

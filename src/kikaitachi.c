@@ -135,7 +135,7 @@ int kt_telemetry_send(int fd, kt_telemetry_item *item) {
 
 // Network *********************************************************************
 
-int kt_connect(char *address, char *port) {
+int kt_udp_bind(char *port) {
 	int fd = socket(AF_INET, SOCK_DGRAM, 0);
 	if (fd < 0) {
 		return -1;
@@ -143,19 +143,31 @@ int kt_connect(char *address, char *port) {
 	struct sockaddr_in addr;
 	memset(&addr, 0, sizeof(addr));
 	addr.sin_family = AF_INET;
-	addr.sin_addr.s_addr = INADDR_ANY;
 	addr.sin_port = htons(atoi(port));
+	addr.sin_addr.s_addr = INADDR_ANY;
 	if (bind(fd, (const struct sockaddr *)&addr, sizeof(addr)) < 0) {
 		return -1;
 	}
-	/*inet_pton(AF_INET, address, &addr.sin_addr);
-	if (connect(fd, (const struct sockaddr *)&addr, sizeof(addr)) < 0) {
-		return -1;
-	}*/
 	return fd;
 }
 
-int kt_send(int fd, const void *buf, size_t len) {
-	return write(fd, buf, len);
+int kt_udp_connect(char *address, char *port) {
+	int fd = socket(AF_INET, SOCK_DGRAM, 0);
+	if (fd < 0) {
+		return -1;
+	}
+	struct sockaddr_in addr;
+	memset(&addr, 0, sizeof(addr));
+	addr.sin_family = AF_INET;
+	addr.sin_port = htons(atoi(port));
+	inet_pton(AF_INET, address, &addr.sin_addr);
+	if (connect(fd, (const struct sockaddr *)&addr, sizeof(addr)) < 0) {
+		return -1;
+	}
+	return fd;
 }
+
+/*int kt_send(int fd, const void *buf, size_t len) {
+	return write(fd, buf, len);
+}*/
 
