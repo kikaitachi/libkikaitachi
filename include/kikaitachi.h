@@ -25,13 +25,6 @@ void kt_log_info(char *format, ...);
  */
 void kt_log_last(char *format, ...);
 
-// Messages ********************************************************************
-
-#define KT_MESSAGE_TELEMETRY_ITEM 0
-
-void kt_msg_set_uint32(void *buffer, uint32_t host_int);
-uint32_t kt_msg_get_uint32(void *buffer);
-
 // Telemetry *******************************************************************
 
 enum KT_TELEMETRY_TYPE {
@@ -66,6 +59,8 @@ int kt_udp_bind(char *port);
 
 int kt_udp_connect(char *address, char *port);
 
+int kt_udp_send(int fd, const void *buf, size_t len);
+
 //int kt_udp_send(int fd, const void *buf, size_t len);
 
 /*void kt_(int port,
@@ -76,9 +71,21 @@ void kt_connect(char *address, int port,
 	void(*on_connected)(int fd),
 	void(*on_disconnected)(),
 	void(*on_telemetry_item_added)(),
-	void(*on_telemetry_value_updated)(int id, int len, void *value));
-
-void kt_send(int fd, ssize_t len, void *buffer);*/
+	void(*on_telemetry_value_updated)(int id, int len, void *value));*/
 
 #endif
+
+// Messages ********************************************************************
+
+enum KT_MESSAGE {
+	KT_MSG_TELEMETRY = 0,
+	KT_MSG_TELEMETRY_DEFINITION = 1,
+	KT_MSG_SHUTDOWN_SOFTWARE = 2,
+	KT_MSG_RESTART_SOFTWARE = 3,
+	KT_MSG_UPDATE_SOFTWARE = 4
+};
+
+int kt_msg_write_int(void **buf, int *buf_len, int value);
+int kt_msg_read_int(void **buf, int *buf_len, int *value);
+int kt_msg_write_telemetry(void **buf, int *buf_len, int id, enum KT_TELEMETRY_TYPE type, int value_len, void *value);
 

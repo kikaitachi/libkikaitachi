@@ -57,19 +57,6 @@ void kt_log_last(char *format, ...) {
 	va_end(argptr);
 }
 
-// Messages ********************************************************************
-
-void kt_msg_set_uint32(void *buffer, uint32_t host_int) {
-	uint32_t network_int = htonl(host_int);
-	memcpy(buffer, &network_int, 4);
-}
-
-uint32_t kt_msg_get_uint32(void *buffer) {
-	uint32_t host_int;
-	memcpy(&host_int, buffer, 4);
-	return ntohl(host_int);
-}
-
 // Telemetry *******************************************************************
 
 kt_telemetry_item *kt_telemetry_create_item(int id, int name_len, char* name, enum KT_TELEMETRY_TYPE type, int value_len, char* value) {
@@ -101,8 +88,8 @@ int kt_telemetry_send_item(int fd, int parent_id, kt_telemetry_item *item) {
 	if (item == NULL) {
 		return 0;
 	}
-	char buffer[KT_MESSAGE_TELEMETRY_ITEM];
-	buffer[0] = KT_MESSAGE_TELEMETRY_ITEM;
+	char buffer[KT_MAX_MSG_SIZE];
+	buffer[0] = KT_MSG_TELEMETRY_DEFINITION;
 	memcpy(buffer + 1, &item->name_len, 4); // Use NETWORK BYTE ORDER
 	memcpy(buffer + 5, item->name, item->name_len);
 	size_t count = 5 + item->name_len;
@@ -167,7 +154,30 @@ int kt_udp_connect(char *address, char *port) {
 	return fd;
 }
 
-/*int kt_send(int fd, const void *buf, size_t len) {
+int kt_udp_send(int fd, const void *buf, size_t len) {
 	return write(fd, buf, len);
-}*/
+}
+
+// Messages ********************************************************************
+
+int kt_msg_write_int(void **buf, int *buf_len, int value) {
+	while (value > 0) {
+		if (*buf_len < 1) {
+			return -1;
+		}
+		((char *)*buf)[0] = ((value > 127 ? 1 : 0) << 1) | (value & 127);
+		(*buf)++;
+		(*buf_len)--;
+		value >>= 7;
+	}
+	return 0;
+}
+
+int kt_msg_read_int(void **buf, int *buf_len, int *value) {
+	return 0;
+}
+
+int kt_msg_write_telemetry(void **buf, int *buf_len, int id, enum KT_TELEMETRY_TYPE type, int value_len, void *value) {
+	return 0;
+}
 
