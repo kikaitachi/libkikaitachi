@@ -161,7 +161,7 @@ int kt_udp_send(int fd, const void *buf, size_t len) {
 // Messages ********************************************************************
 
 int kt_msg_write_int(void **buf, int *buf_len, int value) {
-	while (value > 0) {
+	do {
 		if (*buf_len < 1) {
 			return -1;
 		}
@@ -169,7 +169,7 @@ int kt_msg_write_int(void **buf, int *buf_len, int value) {
 		(*buf)++;
 		(*buf_len)--;
 		value >>= 7;
-	}
+	} while (value > 0);
 	return 0;
 }
 
