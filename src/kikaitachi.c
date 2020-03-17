@@ -188,6 +188,25 @@ int kt_msg_read_int(void **buf, int *buf_len, int *value) {
 	return -1;
 }
 
+int kt_msg_write_float(void **buf, int *buf_len, float value) {
+	if (*buf_len < 4) {
+		return -1;
+	}
+	memcpy(*buf, &value, 4);
+	*buf = (int8_t *)*buf + 4;
+	*buf_len = *buf_len - 4;
+	return 0;
+}
+int kt_msg_read_float(void **buf, int *buf_len, float *value) {
+	if (*buf_len < 4) {
+		return -1;
+	}
+	memcpy(&value, *buf, 4);
+	*buf = (int8_t *)*buf + 4;
+	*buf_len = *buf_len - 4;
+	return 0;
+}
+
 int kt_msg_write_telemetry(void **buf, int *buf_len, int id, enum KT_TELEMETRY_TYPE type, int value_len, void *value) {
 	return 0;
 }

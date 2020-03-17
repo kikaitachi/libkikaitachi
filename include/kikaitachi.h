@@ -31,7 +31,7 @@ enum KT_TELEMETRY_TYPE {
 	KT_TELEMETRY_TYPE_GROUP,
 	KT_TELEMETRY_TYPE_ACTION,
 	KT_TELEMETRY_TYPE_STRING,
-	KT_TELEMETRY_TYPE_DOUBLE
+	KT_TELEMETRY_TYPE_FLOAT
 };
 
 typedef struct kt_telemetry_item {
@@ -87,5 +87,9 @@ enum KT_MESSAGE {
 
 int kt_msg_write_int(void **buf, int *buf_len, int value);
 int kt_msg_read_int(void **buf, int *buf_len, int *value);
+
+int kt_msg_write_float(void **buf, int *buf_len, float value);
+int kt_msg_read_float(void **buf, int *buf_len, float *value);
+
 int kt_msg_write_telemetry(void **buf, int *buf_len, int id, enum KT_TELEMETRY_TYPE type, int value_len, void *value);
 
