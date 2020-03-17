@@ -1,11 +1,61 @@
 #include <arpa/inet.h>
+#include <errno.h>
 #include <netinet/in.h>
+#include <stdarg.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 #include "kikaitachi.h"
 
-#define MAX_MSG_SIZE 1500
+// Logging *********************************************************************
+
+void kt_log_entry(char level, char *format, va_list argptr) {
+	struct timespec now_timespec;
+	clock_gettime(CLOCK_REALTIME, &now_timespec);
+	time_t now_t = now_timespec.tv_sec;
+	struct tm *now_tm = localtime(&now_t);
+	printf("%02d-%02d-%02d %02d:%02d:%02d.%06ld \033[1m%c \033[0m",
+	now_tm->tm_year + 1900, now_tm->tm_mon + 1, now_tm->tm_mday,
+	now_tm->tm_hour, now_tm->tm_min, now_tm->tm_sec,
+	now_timespec.tv_nsec / 1000, level);
+	if (level == 'E') {
+		printf("\033[31m");
+	}
+	vprintf(format, argptr);
+	printf("\033[0m \n");
+}
+
+void kt_log_debug(char *format, ...) {
+	va_list argptr;
+	va_start(argptr, format);
+	kt_log_entry('D', format, argptr);
+	va_end(argptr);
+}
+
+void kt_log_error(char *format, ...) {
+	va_list argptr;
+	va_start(argptr, format);
+	kt_log_entry('E', format, argptr);
+	va_end(argptr);
+}
+
+void kt_log_info(char *format, ...) {
+	va_list argptr;
+	va_start(argptr, format);
+	kt_log_entry('I', format, argptr);
+	va_end(argptr);
+}
+
+void kt_log_last(char *format, ...) {
+	char buffer[1024 * 4];
+	snprintf(buffer, sizeof(buffer), "%s: %s", format, strerror(errno));
+	va_list argptr;
+	va_start(argptr, format);
+	kt_log_entry('L', buffer, argptr);
+	va_end(argptr);
+}
 
 // Messages ********************************************************************
 
@@ -51,7 +101,7 @@ int kt_telemetry_send_item(int fd, int parent_id, kt_telemetry_item *item) {
 	if (item == NULL) {
 		return 0;
 	}
-	char buffer[MAX_MSG_SIZE];
+	char buffer[KT_MESSAGE_TELEMETRY_ITEM];
 	buffer[0] = KT_MESSAGE_TELEMETRY_ITEM;
 	memcpy(buffer + 1, &item->name_len, 4); // Use NETWORK BYTE ORDER
 	memcpy(buffer + 5, item->name, item->name_len);

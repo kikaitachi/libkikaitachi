@@ -3,6 +3,28 @@
 
 #include <netinet/in.h>
 
+// Logging *********************************************************************
+
+/**
+ * Log debug message.
+ */
+void kt_log_debug(char *format, ...);
+
+/**
+ * Log error message.
+ */
+void kt_log_error(char *format, ...);
+
+/**
+ * Log information message.
+ */
+void kt_log_info(char *format, ...);
+
+/**
+ * Log error provided by errno from last system call.
+ */
+void kt_log_last(char *format, ...);
+
 // Messages ********************************************************************
 
 #define KT_MESSAGE_TELEMETRY_ITEM 0
