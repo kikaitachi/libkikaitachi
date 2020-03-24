@@ -87,7 +87,8 @@ enum KT_MESSAGE {
 	KT_MSG_TELEMETRY = 1,
 	KT_MSG_TELEMETRY_DEFINITION = 2,
 	KT_MSG_SHUTDOWN = 3,
-	KT_MSG_UPDATE = 4
+	KT_MSG_UPDATE = 4,
+	KT_MSG_REBOOT = 5
 };
 
 int kt_msg_write(void **buf, int *buf_len, void *data, size_t len);
