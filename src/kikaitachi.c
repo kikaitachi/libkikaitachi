@@ -130,7 +130,7 @@ int kt_telemetry_send(int fd, kt_telemetry_item *item) {
 // Network *********************************************************************
 
 int kt_udp_bind(char *port) {
-	int fd = socket(AF_INET, SOCK_DGRAM, 0);
+	int fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	if (fd < 0) {
 		return -1;
 	}
