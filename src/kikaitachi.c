@@ -34,6 +34,13 @@ void kt_log_debug(char *format, ...) {
 	va_end(argptr);
 }
 
+void kt_log_warn(char *format, ...) {
+	va_list argptr;
+	va_start(argptr, format);
+	kt_log_entry('W', format, argptr);
+	va_end(argptr);
+}
+
 void kt_log_error(char *format, ...) {
 	va_list argptr;
 	va_start(argptr, format);

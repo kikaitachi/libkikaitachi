@@ -11,6 +11,11 @@
 void kt_log_debug(char *format, ...);
 
 /**
+ * Log warning message.
+ */
+void kt_log_warn(char *format, ...);
+
+/**
  * Log error message.
  */
 void kt_log_error(char *format, ...);
