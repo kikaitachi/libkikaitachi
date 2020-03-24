@@ -83,11 +83,11 @@ void kt_connect(char *address, int port,
 // Messages ********************************************************************
 
 enum KT_MESSAGE {
-	KT_MSG_TELEMETRY = 0,
-	KT_MSG_TELEMETRY_DEFINITION = 1,
-	KT_MSG_SHUTDOWN_SOFTWARE = 2,
-	KT_MSG_RESTART_SOFTWARE = 3,
-	KT_MSG_UPDATE_SOFTWARE = 4
+	KT_MSG_DISCOVER = 0,
+	KT_MSG_TELEMETRY = 1,
+	KT_MSG_TELEMETRY_DEFINITION = 2,
+	KT_MSG_SHUTDOWN = 3,
+	KT_MSG_UPDATE = 4
 };
 
 int kt_msg_write(void **buf, int *buf_len, void *data, size_t len);
