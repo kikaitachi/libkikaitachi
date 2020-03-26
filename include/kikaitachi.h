@@ -36,6 +36,7 @@ enum KT_TELEMETRY_TYPE {
 	KT_TELEMETRY_TYPE_GROUP,
 	KT_TELEMETRY_TYPE_ACTION,
 	KT_TELEMETRY_TYPE_STRING,
+	KT_TELEMETRY_TYPE_INT,
 	KT_TELEMETRY_TYPE_FLOAT
 };
 
@@ -66,20 +67,6 @@ int kt_udp_connect(char *address, char *port);
 
 int kt_udp_send(int fd, const void *buf, size_t len);
 
-//int kt_udp_send(int fd, const void *buf, size_t len);
-
-/*void kt_(int port,
-	void(*on_connected)(int fd),
-	void(*on_disconnected)());
-
-void kt_connect(char *address, int port,
-	void(*on_connected)(int fd),
-	void(*on_disconnected)(),
-	void(*on_telemetry_item_added)(),
-	void(*on_telemetry_value_updated)(int id, int len, void *value));*/
-
-#endif
-
 // Messages ********************************************************************
 
 enum KT_MESSAGE {
@@ -101,4 +88,6 @@ int kt_msg_write_float(void **buf, int *buf_len, float value);
 int kt_msg_read_float(void **buf, int *buf_len, float *value);
 
 int kt_msg_write_telemetry(void **buf, int *buf_len, int id, enum KT_TELEMETRY_TYPE type, int value_len, void *value);
+
+#endif
 
