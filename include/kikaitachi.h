@@ -40,23 +40,6 @@ enum KT_TELEMETRY_TYPE {
 	KT_TELEMETRY_TYPE_FLOAT
 };
 
-typedef struct kt_telemetry_item {
-	int id;
-	int name_len;
-	char *name;
-	enum KT_TELEMETRY_TYPE type;
-	int value_len;
-	void *value;
-	struct kt_telemetry_item *child;
-	struct kt_telemetry_item *next;
-} kt_telemetry_item;
-
-kt_telemetry_item *kt_telemetry_create_item(int id, int name_len, char* name, enum KT_TELEMETRY_TYPE type, int value_len, char* value);
-
-void kt_telemetry_free_item(kt_telemetry_item *item);
-
-int kt_telemetry_send(int fd, kt_telemetry_item *item);
-
 // Network *********************************************************************
 
 #define KT_MAX_MSG_SIZE 65507
@@ -72,10 +55,7 @@ int kt_udp_send(int fd, const void *buf, size_t len);
 enum KT_MESSAGE {
 	KT_MSG_DISCOVER = 0,
 	KT_MSG_TELEMETRY = 1,
-	KT_MSG_TELEMETRY_DEFINITION = 2,
-	KT_MSG_SHUTDOWN = 3,
-	KT_MSG_UPDATE = 4,
-	KT_MSG_REBOOT = 5
+	KT_MSG_TELEMETRY_DEFINITION = 2
 };
 
 int kt_msg_write(void **buf, int *buf_len, void *data, size_t len);
