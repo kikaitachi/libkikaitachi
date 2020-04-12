@@ -302,13 +302,16 @@ void map_traverse_node(
 		map_node *node, float x, float y, float width, float height,
 		void (*on_node)(float x, float y, float width, float height, enum MAP_NODE_TYPE type, float likelihood, void *data), void *data) {
 	if (node != NULL) {
-		on_node(x, y, width, height, node->type, node->likelihood, data);
-		if (width > height) {
-			map_traverse_node(node->children[0], x, y, width / 2, height, on_node, data);
-			map_traverse_node(node->children[1], x + width / 2, y, width / 2, height, on_node, data);
+		if (node->children[0] == NULL) {
+			on_node(x, y, width, height, node->type, node->likelihood, data);
 		} else {
-			map_traverse_node(node->children[0], x, y, width, height / 2, on_node, data);
-			map_traverse_node(node->children[1], x, y + height / 2, width, height / 2, on_node, data);
+			if (width > height) {
+				map_traverse_node(node->children[0], x, y, width / 2, height, on_node, data);
+				map_traverse_node(node->children[1], x + width / 2, y, width / 2, height, on_node, data);
+			} else {
+				map_traverse_node(node->children[0], x, y, width, height / 2, on_node, data);
+				map_traverse_node(node->children[1], x, y + height / 2, width, height / 2, on_node, data);
+			}
 		}
 	}
 }
