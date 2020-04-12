@@ -217,6 +217,14 @@ static int circle_contains_rect(float circle_x, float circle_y, float circle_rad
 		squared_dist(circle_x, circle_y, rect_x + rect_width, rect_x + rect_height) <= radius_squared;
 }
 
+static int circle_intersects_rect(float circle_x, float circle_y, float circle_radius, float rect_x, float rect_y, float rect_width, float rect_height) {
+	float radius_squared = circle_radius * circle_radius;
+	return squared_dist(circle_x, circle_y, rect_x, rect_x) <= radius_squared ||
+		squared_dist(circle_x, circle_y, rect_x + rect_width, rect_x) <= radius_squared ||
+		squared_dist(circle_x, circle_y, rect_x, rect_x + rect_height) <= radius_squared ||
+		squared_dist(circle_x, circle_y, rect_x + rect_width, rect_x + rect_height) <= radius_squared;
+}
+
 static void update_map_node(map_node *node, enum MAP_NODE_TYPE type, float likelihood) {
 	if (likelihood >= map->likelihood) {
 		node->type = type;
@@ -231,6 +239,9 @@ static void add_circle(
 		map_node *node,
 		float rect_x, float rect_y, float rect_width, float rect_height,
 		float circle_x, float circle_y, float circle_radius, enum MAP_NODE_TYPE type, float likelihood) {
+	if (!circle_intersects_rect(circle_x, circle_y, circle_radius, rect_x, rect_y, rect_width, rect_height)) {
+		return;
+	}
 	if (circle_contains_rect(circle_x, circle_y, circle_radius, rect_x, rect_y, rect_width, rect_height)) {
 		update_map_node(node, type, likelihood);
 	} else {
