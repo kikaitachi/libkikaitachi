@@ -211,9 +211,9 @@ static float squared_dist(float x1, float y1, float x2, float y2) {
 
 static int circle_contains_rect(float circle_x, float circle_y, float circle_radius, float rect_x, float rect_y, float rect_width, float rect_height) {
 	float radius_squared = circle_radius * circle_radius;
-	return squared_dist(circle_x, circle_y, rect_x, rect_x) <= radius_squared &&
+	return squared_dist(circle_x, circle_y, rect_x, rect_y) <= radius_squared &&
 		squared_dist(circle_x, circle_y, rect_x + rect_width, rect_y) <= radius_squared &&
-		squared_dist(circle_x, circle_y, rect_x, rect_x + rect_height) <= radius_squared &&
+		squared_dist(circle_x, circle_y, rect_x, rect_y + rect_height) <= radius_squared &&
 		squared_dist(circle_x, circle_y, rect_x + rect_width, rect_y + rect_height) <= radius_squared;
 }
 
