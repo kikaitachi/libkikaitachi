@@ -96,5 +96,5 @@ void kt_map_free(map_node **node);
 
 void kt_map_add_circle(float center_x, float center_y, float radius, enum MAP_NODE_TYPE type, float likelihood);
 
-void kt_map_traverse(void (*on_node)(float x, float y, float width, float height, enum MAP_NODE_TYPE type, float likelihood));
+void kt_map_traverse(void (*on_node)(float x, float y, float width, float height, enum MAP_NODE_TYPE type, float likelihood, void *data), void *data);
 

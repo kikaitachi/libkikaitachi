@@ -272,20 +272,20 @@ void kt_map_add_circle(float center_x, float center_y, float radius, enum MAP_NO
 
 void map_traverse_node(
 		map_node *node, float x, float y, float width, float height,
-		void (*on_node)(float x, float y, float width, float height, enum MAP_NODE_TYPE type, float likelihood)) {
+		void (*on_node)(float x, float y, float width, float height, enum MAP_NODE_TYPE type, float likelihood, void *data), void *data) {
 	if (node != NULL) {
-		on_node(x, y, width, height, node->type, node->likelihood);
+		on_node(x, y, width, height, node->type, node->likelihood, data);
 		if (width > height) {
-			map_traverse_node(node->children[0], x, y, width / 2, height, on_node);
-			map_traverse_node(node->children[0], x + width / 2, y, width / 2, height, on_node);
+			map_traverse_node(node->children[0], x, y, width / 2, height, on_node, data);
+			map_traverse_node(node->children[0], x + width / 2, y, width / 2, height, on_node, data);
 		} else {
-			map_traverse_node(node->children[0], x, y, width, height / 2, on_node);
-			map_traverse_node(node->children[0], x, y + height / 2, width, height / 2, on_node);
+			map_traverse_node(node->children[0], x, y, width, height / 2, on_node, data);
+			map_traverse_node(node->children[0], x, y + height / 2, width, height / 2, on_node, data);
 		}
 	}
 }
 
-void kt_map_traverse(void (*on_node)(float x, float y, float width, float height, enum MAP_NODE_TYPE type, float likelihood)) {
-	map_traverse_node(map, map_origin_x, map_origin_y, map_width, map_height, on_node);
+void kt_map_traverse(void (*on_node)(float x, float y, float width, float height, enum MAP_NODE_TYPE type, float likelihood, void *data), void *data) {
+	map_traverse_node(map, map_origin_x, map_origin_y, map_width, map_height, on_node, data);
 }
 
