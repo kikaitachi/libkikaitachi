@@ -260,14 +260,13 @@ static void add_circle(
 }
 
 void kt_map_add_circle(float center_x, float center_y, float radius, enum MAP_NODE_TYPE type, float likelihood) {
-	if (rect_contains_circle(map_origin_x, map_origin_y, map_width, map_height, center_x, center_y, radius)) {
-		add_circle(
-			map,
-			map_origin_x, map_origin_y, map_width, map_height,
-			center_x, center_y, radius, type, likelihood);
-	} else {
-		// TODO: expand map and try again
+	if (!rect_contains_circle(map_origin_x, map_origin_y, map_width, map_height, center_x, center_y, radius)) {
+		// TODO: extend map
 	}
+	add_circle(
+		map,
+		map_origin_x, map_origin_y, map_width, map_height,
+		center_x, center_y, radius, type, likelihood);
 }
 
 void map_traverse_node(
@@ -277,10 +276,10 @@ void map_traverse_node(
 		on_node(x, y, width, height, node->type, node->likelihood, data);
 		if (width > height) {
 			map_traverse_node(node->children[0], x, y, width / 2, height, on_node, data);
-			map_traverse_node(node->children[0], x + width / 2, y, width / 2, height, on_node, data);
+			map_traverse_node(node->children[1], x + width / 2, y, width / 2, height, on_node, data);
 		} else {
 			map_traverse_node(node->children[0], x, y, width, height / 2, on_node, data);
-			map_traverse_node(node->children[0], x, y + height / 2, width, height / 2, on_node, data);
+			map_traverse_node(node->children[1], x, y + height / 2, width, height / 2, on_node, data);
 		}
 	}
 }
