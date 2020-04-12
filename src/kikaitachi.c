@@ -264,7 +264,7 @@ static void add_circle(
 		update_map_node(node, type, likelihood);
 	} else {
 		// If still not too small to split
-		if (rect_width > 2 * map_min_size || rect_height > 2 * map_min_size) {
+		if (rect_width > map_min_size || rect_height > map_min_size) {
 			if (node->children[0] == NULL) {
 				// Split
 				node->children[0] = new_map_node(node->type, node->likelihood);
