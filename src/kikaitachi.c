@@ -217,13 +217,31 @@ static int circle_contains_rect(float circle_x, float circle_y, float circle_rad
 		squared_dist(circle_x, circle_y, rect_x + rect_width, rect_x + rect_height) <= radius_squared;
 }
 
+static float clamp(float value, float min, float max) {
+	return value < min ? min : value > max ? max : value;
+}
+
 static int circle_intersects_rect(float circle_x, float circle_y, float circle_radius, float rect_x, float rect_y, float rect_width, float rect_height) {
+	// Find the closest point to the circle within the rectangle
+	float closestX = clamp(circle_x, rect_x, rect_x + rect_width);
+	float closestY = clamp(circle_y, rect_y, rect_y + rect_height);
+
+	// Calculate the distance between the circle's center and this closest point
+	float distanceX = circle_x - closestX;
+	float distanceY = circle_y - closestY;
+
+	// If the distance is less than the circle's radius, an intersection occurs
+	float distanceSquared = (distanceX * distanceX) + (distanceY * distanceY);
+	return distanceSquared < circle_radius * circle_radius;
+}
+
+/*static int circle_intersects_rect(float circle_x, float circle_y, float circle_radius, float rect_x, float rect_y, float rect_width, float rect_height) {
 	float radius_squared = circle_radius * circle_radius;
 	return squared_dist(circle_x, circle_y, rect_x, rect_x) <= radius_squared ||
 		squared_dist(circle_x, circle_y, rect_x + rect_width, rect_x) <= radius_squared ||
 		squared_dist(circle_x, circle_y, rect_x, rect_x + rect_height) <= radius_squared ||
 		squared_dist(circle_x, circle_y, rect_x + rect_width, rect_x + rect_height) <= radius_squared;
-}
+}*/
 
 static void update_map_node(map_node *node, enum MAP_NODE_TYPE type, float likelihood) {
 	if (likelihood >= map->likelihood) {
