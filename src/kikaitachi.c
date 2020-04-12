@@ -163,3 +163,129 @@ int kt_msg_write_telemetry(void **buf, int *buf_len, int id, enum KT_TELEMETRY_T
 	return 0;
 }
 
+// Map *************************************************************************
+
+static float map_origin_x, map_origin_y, map_width, map_height, map_min_size;
+static map_node *map = NULL;
+
+void kt_map_free(map_node **node) {
+	if (*node != NULL) {
+		kt_map_free(&((*node)->children[0]));
+		kt_map_free(&((*node)->children[1]));
+		free(*node);
+		*node = NULL;
+	}
+}
+
+static map_node *new_map_node(enum MAP_NODE_TYPE type, float likelihood) {
+	map_node *node = malloc(sizeof(map_node));
+	node->type = type;
+	node->likelihood = likelihood;
+	node->children[0] = NULL;
+	node->children[1] = NULL;
+	return node;
+}
+
+void kt_map_init(float origin_x, float origin_y, float width, float height, float min_size) {
+	map_origin_x = origin_x;
+	map_origin_y = origin_y;
+	map_width = width;
+	map_height = height;
+	map_min_size = min_size;
+	kt_map_free(&map);
+	map = new_map_node(MAP_NODE_UNKNOW, 0);
+}
+
+static int rect_contains_circle(float rect_x, float rect_y, float rect_width, float rect_height, float circle_x, float circle_y, float circle_radius) {
+	return rect_x <= circle_x - circle_radius &&
+		rect_y <= circle_y - circle_radius &&
+		rect_x + rect_width >= circle_x + circle_radius &&
+		rect_y + rect_width >= circle_y + circle_radius;
+}
+
+static float squared_dist(float x1, float y1, float x2, float y2) {
+	float dist_x = x1 - x2;
+	float dist_y = y1 - y2;
+	return dist_x * dist_x + dist_y * dist_y;
+}
+
+static int circle_contains_rect(float circle_x, float circle_y, float circle_radius, float rect_x, float rect_y, float rect_width, float rect_height) {
+	float radius_squared = circle_radius * circle_radius;
+	return squared_dist(circle_x, circle_y, rect_x, rect_x) <= radius_squared &&
+		squared_dist(circle_x, circle_y, rect_x + rect_width, rect_x) <= radius_squared &&
+		squared_dist(circle_x, circle_y, rect_x, rect_x + rect_height) <= radius_squared &&
+		squared_dist(circle_x, circle_y, rect_x + rect_width, rect_x + rect_height) <= radius_squared;
+}
+
+static void update_map_node(map_node *node, enum MAP_NODE_TYPE type, float likelihood) {
+	if (likelihood >= map->likelihood) {
+		node->type = type;
+		node->likelihood = likelihood;
+		// Unsplit node if split
+		kt_map_free(&node->children[0]);
+		kt_map_free(&node->children[1]);
+	}
+}
+
+static void add_circle(
+		map_node *node,
+		float rect_x, float rect_y, float rect_width, float rect_height,
+		float circle_x, float circle_y, float circle_radius, enum MAP_NODE_TYPE type, float likelihood) {
+	if (circle_contains_rect(circle_x, circle_y, circle_radius, rect_x, rect_y, rect_width, rect_height)) {
+		update_map_node(node, type, likelihood);
+	} else {
+		// If still not too small to split
+		if (rect_width > 2 * map_min_size || rect_height > 2 * map_min_size) {
+			if (node->children[0] == NULL) {
+				// Split
+				node->children[0] = new_map_node(node->type, node->likelihood);
+				node->children[1] = new_map_node(node->type, node->likelihood);
+			}
+			if (rect_width > rect_height) {
+				add_circle(node->children[0], rect_x, rect_y, rect_width / 2, rect_height,
+					circle_x, circle_y, circle_radius, type, likelihood);
+				add_circle(node->children[1], rect_x + rect_width / 2, rect_y, rect_width / 2, rect_height,
+					circle_x, circle_y, circle_radius, type, likelihood);
+			} else {
+				add_circle(node->children[0], rect_x, rect_y, rect_width, rect_height / 2,
+					circle_x, circle_y, circle_radius, type, likelihood);
+				add_circle(node->children[1], rect_x, rect_y + rect_height / 2, rect_width, rect_height / 2,
+					circle_x, circle_y, circle_radius, type, likelihood);
+			}
+		} else {
+			// Since not whole node is covered by circle reduce likelyhood by 5%
+			update_map_node(node, type, likelihood - 0.05 * likelihood);
+		}
+	}
+}
+
+void kt_map_add_circle(float center_x, float center_y, float radius, enum MAP_NODE_TYPE type, float likelihood) {
+	if (rect_contains_circle(map_origin_x, map_origin_y, map_width, map_height, center_x, center_y, radius)) {
+		add_circle(
+			map,
+			map_origin_x, map_origin_y, map_width, map_height,
+			center_x, center_y, radius, type, likelihood);
+	} else {
+		// TODO: expand map and try again
+	}
+}
+
+void map_traverse_node(
+		map_node *node, float x, float y, float width, float height,
+		void (*on_node)(float x, float y, float width, float height, enum MAP_NODE_TYPE type, float likelihood)) {
+	if (node != NULL) {
+		on_node(x, y, width, height, node->type, node->likelihood);
+		if (width > height) {
+			map_traverse_node(node->children[0], x, y, width / 2, height, on_node);
+			map_traverse_node(node->children[0], x + width / 2, y, width / 2, height, on_node);
+		} else {
+			map_traverse_node(node->children[0], x, y, width, height / 2, on_node);
+			map_traverse_node(node->children[0], x, y + height / 2, width, height / 2, on_node);
+		}
+	}
+}
+
+void kt_map_traverse(void (*on_node)(float x, float y, float width, float height, enum MAP_NODE_TYPE type, float likelihood)) {
+	map_traverse_node(map, map_origin_x, map_origin_y, map_width, map_height, on_node);
+}
+
