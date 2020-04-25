@@ -325,6 +325,9 @@ void kt_map_traverse(void (*on_node)(float x, float y, float width, float height
 kt_double_ring_buffer *kt_double_ring_buffer_create(int size) {
 	kt_double_ring_buffer *ring_buffer = malloc(sizeof(kt_double_ring_buffer));
 	ring_buffer->values = malloc(size * sizeof(double));
+	for (int i = 0; i < size; i++) {
+		ring_buffer->values[i] = 0;
+	}
 	ring_buffer->size = size;
 	ring_buffer->index = 0;
 	ring_buffer->sum = 0;
