@@ -98,3 +98,38 @@ void kt_map_add_circle(float center_x, float center_y, float radius, enum MAP_NO
 
 void kt_map_traverse(void (*on_node)(float x, float y, float width, float height, enum MAP_NODE_TYPE type, float likelihood, void *data), void *data);
 
+// Ring buffer *****************************************************************
+
+typedef struct {
+	double *values;
+	int size;
+	int index;
+	double sum;
+} kt_double_ring_buffer;
+
+kt_double_ring_buffer *kt_double_ring_buffer_create(int size);
+
+void kt_double_ring_buffer_add(kt_double_ring_buffer *ring_buffer, double value);
+
+double kt_double_ring_buffer_sum(kt_double_ring_buffer *ring_buffer);
+
+void kt_double_ring_buffer_free(kt_double_ring_buffer *ring_buffer);
+
+// Genetic algorithm ***********************************************************
+
+typedef float* (*kt_generate_individual_function_t)(int gene_count);
+typedef void (*mutate_individual_function_t)(float genes[], int gene_count);
+
+typedef struct {
+	int gene_count;
+	float *genes;
+	float fitness;
+} kt_individual;
+
+typedef struct {
+	int population_size;
+	int survivors;
+	int mutants;
+	kt_individual *individuals;
+} kt_population;
+
