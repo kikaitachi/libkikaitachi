@@ -340,6 +340,11 @@ void kt_double_ring_buffer_add(kt_double_ring_buffer *ring_buffer, double value)
 		ring_buffer->index = 0;
 	}
 	ring_buffer->sum = ring_buffer->sum - ring_buffer->values[ring_buffer->index] + value;
+	ring_buffer->values[ring_buffer->index] = value;
+}
+
+double kt_double_ring_buffer_last(kt_double_ring_buffer *ring_buffer) {
+	return ring_buffer->values[ring_buffer->index];
 }
 
 double kt_double_ring_buffer_sum(kt_double_ring_buffer *ring_buffer) {

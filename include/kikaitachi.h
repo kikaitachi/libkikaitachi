@@ -111,6 +111,8 @@ kt_double_ring_buffer *kt_double_ring_buffer_create(int size);
 
 void kt_double_ring_buffer_add(kt_double_ring_buffer *ring_buffer, double value);
 
+double kt_double_ring_buffer_last(kt_double_ring_buffer *ring_buffer);
+
 double kt_double_ring_buffer_sum(kt_double_ring_buffer *ring_buffer);
 
 void kt_double_ring_buffer_free(kt_double_ring_buffer *ring_buffer);
