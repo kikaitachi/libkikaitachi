@@ -137,7 +137,7 @@ int kt_msg_write_int(void **buf, int *buf_len, int value) {
 	}
 	int8_t byte = ((value > 63 ? 1 : 0) << 7) | sign | (value & 63);
 	memcpy(*buf, &byte, 1);
-	value >>= 7;
+	value >>= 6;
 	*buf = (int8_t *)*buf + 1;
 	*buf_len = *buf_len - 1;
 	while (value > 0) {
@@ -154,15 +154,17 @@ int kt_msg_write_int(void **buf, int *buf_len, int value) {
 }
 
 int kt_msg_read_int(void **buf, int *buf_len, int *value) {
-	for (int i = 0; *buf_len > 0; i += 7) {
+	for (int i = 0; *buf_len > 0; ) {
 		int byte = ((int8_t *)*buf)[0];
 		if (i == 0) {
 			*value = byte & 63;
 			if ((byte & (1 << 6)) > 0) {
 				*value = -*value;
 			}
+			i += 6;
 		} else {
 			*value = *value | ((byte & 127) << i);
+			i += 7;
 		}
 		*buf = (int8_t *)*buf + 1;
 		*buf_len = *buf_len - 1;
