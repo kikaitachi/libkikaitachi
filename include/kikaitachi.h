@@ -76,7 +76,11 @@ int kt_msg_read_double(void **buf, int *buf_len, double *value);
 
 int kt_msg_write_telemetry(void **buf, int *buf_len, int id, enum KT_TELEMETRY_TYPE type, int value_len, void *value);
 
-#endif
+// Util ************************************************************************
+
+int kt_clamp_int(int value, int min, int max);
+float kt_clamp_float(float value, float min, float max);
+double kt_clamp_double(double value, double min, double max);
 
 // Map *************************************************************************
 
@@ -119,4 +123,6 @@ double kt_double_ring_buffer_last(kt_double_ring_buffer *ring_buffer);
 double kt_double_ring_buffer_sum(kt_double_ring_buffer *ring_buffer);
 
 void kt_double_ring_buffer_free(kt_double_ring_buffer *ring_buffer);
+
+#endif
 

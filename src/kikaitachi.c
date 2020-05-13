@@ -171,6 +171,20 @@ int kt_msg_write_telemetry(void **buf, int *buf_len, int id, enum KT_TELEMETRY_T
 	return 0;
 }
 
+// Util ************************************************************************
+
+int kt_clamp_int(int value, int min, int max) {
+	return value < min ? min : value > max ? max : value;
+}
+
+float kt_clamp_float(float value, float min, float max) {
+	return value < min ? min : value > max ? max : value;
+}
+
+double kt_clamp_double(double value, double min, double max) {
+	return value < min ? min : value > max ? max : value;
+}
+
 // Map *************************************************************************
 
 static float map_origin_x, map_origin_y, map_width, map_height, map_min_size;
@@ -225,14 +239,10 @@ static int circle_contains_rect(float circle_x, float circle_y, float circle_rad
 		squared_dist(circle_x, circle_y, rect_x + rect_width, rect_y + rect_height) <= radius_squared;
 }
 
-static float clamp(float value, float min, float max) {
-	return value < min ? min : value > max ? max : value;
-}
-
 static int circle_intersects_rect(float circle_x, float circle_y, float circle_radius, float rect_x, float rect_y, float rect_width, float rect_height) {
 	// Find the closest point to the circle within the rectangle
-	float closestX = clamp(circle_x, rect_x, rect_x + rect_width);
-	float closestY = clamp(circle_y, rect_y, rect_y + rect_height);
+	float closestX = kt_clamp_float(circle_x, rect_x, rect_x + rect_width);
+	float closestY = kt_clamp_float(circle_y, rect_y, rect_y + rect_height);
 
 	// Calculate the distance between the circle's center and this closest point
 	float distanceX = circle_x - closestX;
