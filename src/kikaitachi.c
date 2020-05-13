@@ -154,13 +154,12 @@ int kt_msg_write_int(void **buf, int *buf_len, int value) {
 }
 
 int kt_msg_read_int(void **buf, int *buf_len, int *value) {
+	int negative;
 	for (int i = 0; *buf_len > 0; ) {
 		int byte = ((int8_t *)*buf)[0];
 		if (i == 0) {
 			*value = byte & 63;
-			if ((byte & (1 << 6)) > 0) {
-				*value = -*value;
-			}
+			negative = (byte & (1 << 6)) > 0;
 			i += 6;
 		} else {
 			*value = *value | ((byte & 127) << i);
@@ -169,6 +168,9 @@ int kt_msg_read_int(void **buf, int *buf_len, int *value) {
 		*buf = (int8_t *)*buf + 1;
 		*buf_len = *buf_len - 1;
 		if (byte >= 0) {
+			if (negative) {
+				*value = -*value;
+			}
 			return 0;
 		}
 	}
