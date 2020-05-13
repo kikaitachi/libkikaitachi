@@ -71,6 +71,9 @@ int kt_msg_read_int(void **buf, int *buf_len, int *value);
 int kt_msg_write_float(void **buf, int *buf_len, float value);
 int kt_msg_read_float(void **buf, int *buf_len, float *value);
 
+int kt_msg_write_double(void **buf, int *buf_len, double value);
+int kt_msg_read_double(void **buf, int *buf_len, double *value);
+
 int kt_msg_write_telemetry(void **buf, int *buf_len, int id, enum KT_TELEMETRY_TYPE type, int value_len, void *value);
 
 #endif
@@ -116,22 +119,4 @@ double kt_double_ring_buffer_last(kt_double_ring_buffer *ring_buffer);
 double kt_double_ring_buffer_sum(kt_double_ring_buffer *ring_buffer);
 
 void kt_double_ring_buffer_free(kt_double_ring_buffer *ring_buffer);
-
-// Genetic algorithm ***********************************************************
-
-typedef float* (*kt_generate_individual_function_t)(int gene_count);
-typedef void (*mutate_individual_function_t)(float genes[], int gene_count);
-
-typedef struct {
-	int gene_count;
-	float *genes;
-	float fitness;
-} kt_individual;
-
-typedef struct {
-	int population_size;
-	int survivors;
-	int mutants;
-	kt_individual *individuals;
-} kt_population;
 
