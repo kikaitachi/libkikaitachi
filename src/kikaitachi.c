@@ -125,7 +125,22 @@ int kt_msg_read(void **buf, int *buf_len, void *data, size_t len) {
 }
 
 int kt_msg_write_int(void **buf, int *buf_len, int value) {
-	do {
+	if (*buf_len < 1) {
+		return -1;
+	}
+	int sign;
+	if (value < 0) {
+		sign = 1 << 6;
+		value = -value;
+	} else {
+		sign = 0;
+	}
+	int8_t byte = ((value > 63 ? 1 : 0) << 7) | sign | (value & 63);
+	memcpy(*buf, &byte, 1);
+	value >>= 7;
+	*buf = (int8_t *)*buf + 1;
+	*buf_len = *buf_len - 1;
+	while (value > 0) {
 		if (*buf_len < 1) {
 			return -1;
 		}
@@ -134,15 +149,21 @@ int kt_msg_write_int(void **buf, int *buf_len, int value) {
 		value >>= 7;
 		*buf = (int8_t *)*buf + 1;
 		*buf_len = *buf_len - 1;
-	} while (value > 0);
+	}
 	return 0;
 }
 
 int kt_msg_read_int(void **buf, int *buf_len, int *value) {
-	*value = 0;
 	for (int i = 0; *buf_len > 0; i += 7) {
 		int byte = ((int8_t *)*buf)[0];
-		*value = *value | ((byte & 127) << i);
+		if (i == 0) {
+			*value = byte & 63;
+			if ((byte & (1 << 6)) > 0) {
+				*value = -*value;
+			}
+		} else {
+			*value = *value | ((byte & 127) << i);
+		}
 		*buf = (int8_t *)*buf + 1;
 		*buf_len = *buf_len - 1;
 		if (byte >= 0) {
