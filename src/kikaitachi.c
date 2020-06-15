@@ -1,10 +1,14 @@
 #include <arpa/inet.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <libv4l2.h>
+#include <linux/videodev2.h>
 #include <netinet/in.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/mman.h>
 #include <time.h>
 #include <unistd.h>
 #include "kikaitachi.h"
@@ -397,5 +401,150 @@ double kt_double_ring_buffer_sum(kt_double_ring_buffer *ring_buffer) {
 void kt_double_ring_buffer_free(kt_double_ring_buffer *ring_buffer) {
 	free(ring_buffer->values);
 	free(ring_buffer);
+}
+
+// Camera **********************************************************************
+
+#define CLEAR(x) memset(&(x), 0, sizeof(x))
+
+struct buffer {
+  void *start;
+  size_t length;
+};
+
+int xioctl(int fh, int request, void *arg) {
+  int r;
+  do {
+    r = v4l2_ioctl(fh, request, arg);
+  } while (r == -1 && ((errno == EINTR) || (errno == EAGAIN)));
+  return r;
+}
+
+struct v4l2_buffer buf;
+unsigned int n_buffers;
+struct buffer *buffers;
+
+int kt_camera_open(char* device, int width, int height, int format, int numerator, int denominator) {
+  int fd = v4l2_open(device, O_RDWR | O_NONBLOCK);
+  if (fd < 0) {
+    kt_log_last("Can't open video device %s", device);
+    return fd;
+  }
+
+  struct v4l2_format fmt;
+  CLEAR(fmt);
+  fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+  fmt.fmt.pix.width       = width;
+  fmt.fmt.pix.height      = height;
+  fmt.fmt.pix.pixelformat = format;
+  fmt.fmt.pix.field       = V4L2_FIELD_INTERLACED;
+  if (xioctl(fd, VIDIOC_S_FMT, &fmt) == -1) {
+    kt_log_last("Can't set camera format");
+    return -1;
+  }
+  if (fmt.fmt.pix.pixelformat != format) {
+    kt_log_error("Given format is not supported by camera");
+    return -1;
+  }
+
+  struct v4l2_streamparm frameint;
+  CLEAR(frameint);
+  frameint.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+  frameint.parm.capture.timeperframe.numerator = numerator;
+  frameint.parm.capture.timeperframe.denominator = denominator;
+  if (xioctl(fd, VIDIOC_S_PARM, &frameint) == -1) {
+    kt_log_last("Can't set camera frame rate");
+    return -1;
+  }
+
+  struct v4l2_requestbuffers req;
+  CLEAR(req);
+  req.count = 2;
+  req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+  req.memory = V4L2_MEMORY_MMAP;
+  if (xioctl(fd, VIDIOC_REQBUFS, &req) == -1) {
+    kt_log_last("Can't allocate buffers for camera");
+    return -1;
+  }
+
+  buffers = calloc(req.count, sizeof(*buffers));
+  for (n_buffers = 0; n_buffers < req.count; ++n_buffers) {
+    CLEAR(buf);
+    buf.type        = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    buf.memory      = V4L2_MEMORY_MMAP;
+    buf.index       = n_buffers;
+
+    xioctl(fd, VIDIOC_QUERYBUF, &buf);
+
+    buffers[n_buffers].length = buf.length;
+    buffers[n_buffers].start = v4l2_mmap(NULL, buf.length, PROT_READ | PROT_WRITE, MAP_SHARED, fd, buf.m.offset);
+
+    if (MAP_FAILED == buffers[n_buffers].start) {
+      kt_log_last("Failed to map memory for camera");
+      return -1;
+    }
+  }
+
+  for (int i = 0; i < n_buffers; ++i) {
+    CLEAR(buf);
+    buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    buf.memory = V4L2_MEMORY_MMAP;
+    buf.index = i;
+    xioctl(fd, VIDIOC_QBUF, &buf);
+  }
+
+  enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+  if (xioctl(fd, VIDIOC_STREAMON, &type) == -1) {
+    kt_log_last("Failed to start capturing from camera");
+    return -1;
+  }
+
+  return fd;
+}
+
+void kt_camera_list_formats(int camera_fd,
+    void (*process_format)(int pixelformat, int width, int height, int numerator, int denominator, char *description)) {
+  enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+  struct v4l2_fmtdesc fmt;
+  struct v4l2_frmsizeenum frmsize;
+  struct v4l2_frmivalenum frmival;
+  fmt.index = 0;
+  fmt.type = type;
+  while (ioctl(camera_fd, VIDIOC_ENUM_FMT, &fmt) >= 0) {
+    frmsize.pixel_format = fmt.pixelformat;
+    frmsize.index = 0;
+    while (ioctl(camera_fd, VIDIOC_ENUM_FRAMESIZES, &frmsize) >= 0) {
+      if (frmsize.type == V4L2_FRMSIZE_TYPE_DISCRETE) {
+        frmival.pixel_format = fmt.pixelformat;
+        frmival.index = 0;
+        frmival.width = frmsize.discrete.width;
+        frmival.height = frmsize.discrete.height;
+        while (ioctl(camera_fd, VIDIOC_ENUM_FRAMEINTERVALS, &frmival) >= 0) {
+          process_format(fmt.pixelformat, frmival.width, frmival.height, frmival.discrete.numerator, frmival.discrete.denominator, (char *)fmt.description);
+          frmival.index++;
+        }
+      }
+      frmsize.index++;
+    }
+    fmt.index++;
+  }
+}
+
+void kt_camera_capture_image(int camera_fd, void (*process_image)(unsigned char *frame, int length, struct timeval timestamp)) {
+  CLEAR(buf);
+  buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+  buf.memory = V4L2_MEMORY_MMAP;
+  xioctl(camera_fd, VIDIOC_DQBUF, &buf);
+  process_image(buffers[buf.index].start, buf.bytesused, buf.timestamp);
+  xioctl(camera_fd, VIDIOC_QBUF, &buf);
+}
+
+void kt_camera_close(int camera_fd) {
+  enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+  xioctl(camera_fd, VIDIOC_STREAMOFF, &type);
+  for (int i = 0; i < n_buffers; ++i) {
+    v4l2_munmap(buffers[i].start, buffers[i].length);
+  }
+  v4l2_close(camera_fd);
 }
 
