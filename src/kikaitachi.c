@@ -459,7 +459,7 @@ int kt_camera_open(char* device, int width, int height, int format, int numerato
 
   struct v4l2_requestbuffers req;
   CLEAR(req);
-  req.count = 1/*2*/;
+  req.count = 2;
   req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
   req.memory = V4L2_MEMORY_MMAP;
   if (xioctl(fd, VIDIOC_REQBUFS, &req) == -1) {
