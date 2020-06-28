@@ -1,6 +1,7 @@
 #include <arpa/inet.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <sys/ioctl.h>
 #include <libv4l2.h>
 #include <linux/videodev2.h>
 #include <netinet/in.h>
@@ -11,6 +12,7 @@
 #include <sys/mman.h>
 #include <time.h>
 #include <unistd.h>
+
 #include "kikaitachi.h"
 
 // Logging *********************************************************************
