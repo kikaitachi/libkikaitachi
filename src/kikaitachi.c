@@ -439,7 +439,7 @@ int kt_camera_open(char* device, int width, int height, int format, int numerato
   fmt.fmt.pix.width       = width;
   fmt.fmt.pix.height      = height;
   fmt.fmt.pix.pixelformat = format;
-  fmt.fmt.pix.field       = V4L2_FIELD_INTERLACED;
+  fmt.fmt.pix.field       = V4L2_FIELD_ANY; //V4L2_FIELD_INTERLACED;
   if (xioctl(fd, VIDIOC_S_FMT, &fmt) == -1) {
     kt_log_last("Can't set camera format");
     return -1;
