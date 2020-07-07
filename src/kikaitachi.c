@@ -426,7 +426,7 @@ struct v4l2_buffer buf;
 unsigned int n_buffers;
 struct buffer *buffers;
 
-int kt_camera_open(char* device, int width, int height, int format, int numerator, int denominator) {
+int kt_camera_open(char* device, int width, int height, int format, int numerator, int denominator, int buf_count) {
   int fd = v4l2_open(device, O_RDWR | O_NONBLOCK);
   if (fd < 0) {
     kt_log_last("Can't open video device %s", device);
@@ -461,7 +461,7 @@ int kt_camera_open(char* device, int width, int height, int format, int numerato
 
   struct v4l2_requestbuffers req;
   CLEAR(req);
-  req.count = 8;
+  req.count = buf_count;
   req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
   req.memory = V4L2_MEMORY_MMAP;
   if (xioctl(fd, VIDIOC_REQBUFS, &req) == -1) {
