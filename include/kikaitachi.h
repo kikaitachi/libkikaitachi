@@ -126,16 +126,5 @@ double kt_double_ring_buffer_sum(kt_double_ring_buffer *ring_buffer);
 
 void kt_double_ring_buffer_free(kt_double_ring_buffer *ring_buffer);
 
-// Camera **********************************************************************
-
-int kt_camera_open(char* device, int width, int height, int format, int numerator, int denominator, int buf_count);
-
-void kt_camera_list_formats(int camera_fd,
-    void (*process_format)(int pixelformat, int width, int height, int numerator, int denominator, char *description));
-
-void kt_camera_capture_image(int camera_fd, void (*process_image)(unsigned char *frame, int length, struct timeval timestamp));
-
-void kt_camera_close(int camera_fd);
-
 #endif
 
