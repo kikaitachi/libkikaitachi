@@ -3,6 +3,10 @@
 
 #include <netinet/in.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Logging *********************************************************************
 
 /**
@@ -125,6 +129,10 @@ double kt_double_ring_buffer_last(kt_double_ring_buffer *ring_buffer);
 double kt_double_ring_buffer_sum(kt_double_ring_buffer *ring_buffer);
 
 void kt_double_ring_buffer_free(kt_double_ring_buffer *ring_buffer);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 
