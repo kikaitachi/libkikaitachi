@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/epoll.h>
 #include <sys/mman.h>
 #include <time.h>
 #include <unistd.h>
@@ -68,6 +69,20 @@ void kt_log_last(char *format, ...) {
 	va_start(argptr, format);
 	kt_log_entry('L', buffer, argptr);
 	va_end(argptr);
+}
+
+// IO **************************************************************************
+
+int kt_epoll_add(int epoll_fd, int fd, uint32_t events) {
+	struct epoll_event event;
+	event.data.fd = fd;
+	event.events = events;
+	if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, fd, &event) == -1) {
+		kt_log_error("Failed to add descriptor %d to epoll descriptor %d for events %d: %s",
+			fd, epoll_fd, events, strerror(errno));
+		return -1;
+	}
+	return 0;
 }
 
 // Network *********************************************************************

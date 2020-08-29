@@ -44,6 +44,10 @@ enum KT_TELEMETRY_TYPE {
 	KT_TELEMETRY_TYPE_FLOAT
 };
 
+// IO **************************************************************************
+
+int kt_epoll_add(int epoll_fd, int fd, uint32_t events);
+
 // Network *********************************************************************
 
 #define KT_MAX_MSG_SIZE 65507
